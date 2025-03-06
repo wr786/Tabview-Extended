@@ -24,6 +24,7 @@ import unicodedata
 from urllib.parse import urlparse
 import shlex
 
+import datetime
 
 basestring = str
 file = io.FileIO
@@ -43,6 +44,34 @@ def insstr(*args):
     scr, args = args[0], args[1:]
     return scr.insstr(*args)
 
+def convert_timestamp(ts):
+    ts_str = str(ts)
+    length = len(ts_str)
+    
+    # 根据位数判断单位
+    if 13 <= length <= 16:
+        # 微秒级别
+        nano_timestamp = int(ts) * 1000
+    elif 18 <= length <= 19:
+        # 纳秒级别
+        nano_timestamp = int(ts)
+    else:
+        raise ValueError(f"无法判断时间戳单位，位数 {length} 不在预期范围内")
+
+    try:
+        # 转换为秒（整数部分）
+        seconds = int(nano_timestamp / 1_000_000_000 + 0.5)
+        # 提取纳秒余数，转换为微秒
+        nanos_remainder = nano_timestamp % 1_000_000_000
+        microseconds = int(nanos_remainder / 1_000 + 0.5)  # 纳秒转微秒
+        # 转换为 datetime 对象
+        dt = datetime.datetime.fromtimestamp(seconds)
+        # 格式化为目标字符串，添加微秒
+        formatted = dt.strftime('%Y-%m-%d %H:%M:%S') + f'.{microseconds:06d}'
+        return formatted
+    except ValueError as e:
+        print(f"错误: 无法解析时间戳 {nano_timestamp}, 错误信息: {e}")
+        return None
 
 class ReloadException(Exception):
     def __init__(self, start_pos, column_width, column_gap, column_widths,
@@ -628,6 +657,16 @@ class Viewer:
         self.column_width[xs] = width
         self.recalculate_layout()
 
+    def convert_datetime(self):
+        xp = self.x + self.win_x
+        tmpdata = self.data
+        for y in range(len(tmpdata)):
+            if not self._is_num(tmpdata[y][xp]):
+                return  # not a num, can not convert
+            tmpdata[y][xp] = convert_timestamp(tmpdata[y][xp])
+        self.data = tmpdata
+        self.resize()
+
     def yank_cell(self):
         yp = self.y + self.win_y
         xp = self.x + self.win_x
@@ -680,6 +719,7 @@ class Viewer:
                      '@': self.sort_by_column_numeric_reverse,
                      's': self.sort_by_column,
                      'S': self.sort_by_column_reverse,
+                     'T': self.convert_datetime,
                      'y': self.yank_cell,
                      'r': self.reload,
                      'c': self.toggle_column_width,
