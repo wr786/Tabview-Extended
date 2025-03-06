@@ -48,15 +48,16 @@ def convert_timestamp(ts):
     ts_str = str(ts)
     length = len(ts_str)
     
-    # 根据位数判断单位
-    if 13 <= length <= 16:
-        # 微秒级别
-        nano_timestamp = int(ts) * 1000
-    elif 18 <= length <= 19:
-        # 纳秒级别
+    if 9 <= length <= 11:
+        nano_timestamp = int(ts) * 1_000_000_000
+    elif 12 <= length <= 14:
+        nano_timestamp = int(ts) * 1_000_000
+    elif 15 <= length <= 17:
+        nano_timestamp = int(ts) * 1_000
+    elif 18 <= length <= 20:
         nano_timestamp = int(ts)
     else:
-        raise ValueError(f"无法判断时间戳单位，位数 {length} 不在预期范围内")
+        return ts
 
     try:
         # 转换为秒（整数部分）
@@ -70,8 +71,7 @@ def convert_timestamp(ts):
         formatted = dt.strftime('%Y-%m-%d %H:%M:%S') + f'.{microseconds:06d}'
         return formatted
     except ValueError as e:
-        print(f"错误: 无法解析时间戳 {nano_timestamp}, 错误信息: {e}")
-        return None
+        return ts
 
 class ReloadException(Exception):
     def __init__(self, start_pos, column_width, column_gap, column_widths,
@@ -719,7 +719,6 @@ class Viewer:
                      '@': self.sort_by_column_numeric_reverse,
                      's': self.sort_by_column,
                      'S': self.sort_by_column_reverse,
-                     'T': self.convert_datetime,
                      'y': self.yank_cell,
                      'r': self.reload,
                      'c': self.toggle_column_width,
@@ -745,6 +744,7 @@ class Viewer:
                      KEY_CTRL('e'): self.line_end,
                      KEY_CTRL('l'): self.scr.redrawwin,
                      KEY_CTRL('g'): self.show_info,
+                     'd': self.convert_datetime
                      }
 
     def run(self):
