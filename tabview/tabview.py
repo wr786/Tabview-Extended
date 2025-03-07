@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 import shlex
 
 import datetime
+import gzip
 
 basestring = str
 file = io.FileIO
@@ -1347,10 +1348,14 @@ def view(data, enc=None, start_pos=(0, 0), column_width=20, column_gap=2,
             try:
                 if isinstance(data, basestring):
                     parsed_path = parse_path(data)
-                    with open(parsed_path, 'rb') as fd:
-                        new_data = fd.readlines()
-                        if info == "":
-                            info = data
+                    if parsed_path.endswith('.gz'):
+                        with gzip.open(parsed_path, 'rb') as fd:
+                            new_data = fd.readlines()
+                    else:
+                        with open(parsed_path, 'rb') as fd:
+                            new_data = fd.readlines()
+                    if info == "":
+                        info = data
                 elif isinstance(data, (io.IOBase, file)):
                     new_data = data.readlines()
                 else:
