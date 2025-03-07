@@ -110,15 +110,15 @@ class Viewer:
         self.info = kwargs.get('info')
         self.header_offset_orig = 3
         self.header = self.data[0]
-        if len(self.data) > 1 and \
-                not any(self._is_num(cell) for cell in self.header):
-            del self.data[0]
-            self.header_offset = self.header_offset_orig
-        else:
-            # Don't make one line file a header row
-            # If any of the header line cells are all digits, assume that the
-            # first line is NOT a header
-            self.header_offset = self.header_offset_orig - 1
+        # if len(self.data) > 1 and \
+        #         not any(self._is_num(cell) for cell in self.header):
+        del self.data[0]
+        self.header_offset = self.header_offset_orig
+        # else:
+        #     # Don't make one line file a header row
+        #     # If any of the header line cells are all digits, assume that the
+        #     # first line is NOT a header
+        #     self.header_offset = self.header_offset_orig - 1
         self.num_data_columns = len(self.data[0])
         self._init_double_width(kwargs.get('double_width'))
         self.column_width_mode = kwargs.get('column_width')
@@ -705,11 +705,59 @@ class Viewer:
         self.recalculate_layout()
         self.resize()
 
+    def _filter_columns_validator(self, ch):
+        if ch == curses.ascii.NL:  # Enter
+            return curses.ascii.BEL
+        elif ch == 127:  # Backspace
+            self.search_str = self.textpad.gather().strip().lower()[:-1]
+            return 8
+        else:
+            return ch
+
+    def filter_columns_by_regex(self):
+        scr2 = curses.newwin(3, self.max_x, self.max_y - 3, 0)
+        scr3 = scr2.derwin(1, self.max_x - 12, 1, 9)
+        scr2.box()
+        scr2.move(1, 1)
+        addstr(scr2, "Filter: ")
+        scr2.refresh()
+        curses.curs_set(1)
+        self._search_win_open = 3
+        self.textpad = Textbox(scr3, insert_mode=True)
+        filter_regex = self.textpad.edit(self._filter_columns_validator)
+        try:
+            curses.curs_set(0)
+        except _curses.error:
+            pass
+        self._search_win_open = 0
+
+        filter_regex = filter_regex.strip()
+        filter_regex = filter_regex.strip('\a')
+
+        matching_indices = [i for i, s in enumerate(self.header) if not re.search(filter_regex, s)]
+        matching_indices = sorted(matching_indices, reverse=True)
+        if len(matching_indices) >= len(self.header):
+            return
+        for row in self.data:
+            for i in matching_indices:
+                del row[i]
+        for i in matching_indices:
+            del self.header[i]
+        self.num_columns -= len(matching_indices)
+        self.num_data_columns -= len(matching_indices)
+        self.x -= len(matching_indices)
+        if self.x < 0:
+            self.x = 0
+        self.recalculate_layout()
+        self.resize()
+
     def define_keys(self):
         self.keys = {
                      'd': self.convert_datetime,
                      '@': self.filter_same_cells,
                      '-': self.hide_column,
+                     '*': self.filter_columns_by_regex,
+
                      'j': self.down,
                      'k': self.up,
                      'h': self.left,

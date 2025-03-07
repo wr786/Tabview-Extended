@@ -117,6 +117,7 @@ Keybindings:
 **d**                        Convert datetime
 **@**                        Filter same cells
 **-**                        Hide column
+*****                        Filter columns by regex
 
 **F1 or ?**                  Show this list of keybindings
 **Cursor keys or h,j,k,l**   Move the highlighted cell, scrolling if required.
