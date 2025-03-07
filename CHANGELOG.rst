@@ -1,3 +1,8 @@
+*Version 2.0.0 2025/03/06*
+
+ - [d] convert datetime
+ - [@] filter same cells
+
 *Version 1.4.4 2020/01/09*
 
   - Remove Python 2.x support
