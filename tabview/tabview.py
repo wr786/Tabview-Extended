@@ -26,6 +26,7 @@ import shlex
 
 import datetime
 import gzip
+import pandas as pd
 
 basestring = str
 file = io.FileIO
@@ -1348,7 +1349,10 @@ def view(data, enc=None, start_pos=(0, 0), column_width=20, column_gap=2,
             try:
                 if isinstance(data, basestring):
                     parsed_path = parse_path(data)
-                    if parsed_path.endswith('.gz'):
+                    if parsed_path.endswith('.feather'):
+                        df = pd.read_feather(parsed_path)
+                        new_data = [list(df.columns)] + [list(row) for row in df.itertuples(index=False)]
+                    elif parsed_path.endswith('.gz'):
                         with gzip.open(parsed_path, 'rb') as fd:
                             new_data = fd.readlines()
                     else:
