@@ -659,22 +659,6 @@ class Viewer:
         self.column_width[xs] = width
         self.recalculate_layout()
 
-    def convert_datetime(self):
-        xp = self.x + self.win_x
-        tmpdata = self.data
-        for y in range(len(tmpdata)):
-            if not self._is_num(tmpdata[y][xp]):
-                return  # not a num, can not convert
-            tmpdata[y][xp] = convert_timestamp(tmpdata[y][xp])
-        self.data = tmpdata
-
-    def filter_same_cells(self):
-        xp = self.x + self.win_x
-        yp = self.y + self.win_y
-        filtered_data = [row for row in self.data if row[xp] == self.data[yp][xp]]
-        self.data = filtered_data
-        self.resize()
-
     def yank_cell(self):
         yp = self.y + self.win_y
         xp = self.x + self.win_x
@@ -692,8 +676,41 @@ class Viewer:
             except IOError:
                 pass
 
+    def convert_datetime(self):
+        xp = self.x + self.win_x
+        tmpdata = self.data
+        for y in range(len(tmpdata)):
+            if not self._is_num(tmpdata[y][xp]):
+                return  # not a num, can not convert
+            tmpdata[y][xp] = convert_timestamp(tmpdata[y][xp])
+        self.data = tmpdata
+
+    def filter_same_cells(self):
+        xp = self.x + self.win_x
+        yp = self.y + self.win_y
+        filtered_data = [row for row in self.data if row[xp] == self.data[yp][xp]]
+        self.data = filtered_data
+        self.resize()
+
+    def hide_column(self):
+        xp = self.x + self.win_x
+        for row in self.data:
+            del row[xp]
+        del self.header[xp]
+        self.num_columns -= 1
+        self.num_data_columns -= 1
+        self.x -= 1
+        if self.x < 0:
+            self.x = 0
+        self.recalculate_layout()
+        self.resize()
+
     def define_keys(self):
-        self.keys = {'j': self.down,
+        self.keys = {
+                     'd': self.convert_datetime,
+                     '@': self.filter_same_cells,
+                     '-': self.hide_column,
+                     'j': self.down,
                      'k': self.up,
                      'h': self.left,
                      'l': self.right,
@@ -715,7 +732,6 @@ class Viewer:
                      'n': self.search_results,
                      'p': self.search_results_prev,
                      't': self.toggle_header,
-                     '-': self.column_gap_down,
                      '+': self.column_gap_up,
                      '<': self.column_width_all_down,
                      '>': self.column_width_all_up,
@@ -724,7 +740,6 @@ class Viewer:
                      'a': self.sort_by_column_natural,
                      'A': self.sort_by_column_natural_reverse,
                      '#': self.sort_by_column_numeric,
-                     '@': self.filter_same_cells,
                      's': self.sort_by_column,
                      'S': self.sort_by_column_reverse,
                      'y': self.yank_cell,
@@ -751,8 +766,7 @@ class Viewer:
                      KEY_CTRL('a'): self.line_home,
                      KEY_CTRL('e'): self.line_end,
                      KEY_CTRL('l'): self.scr.redrawwin,
-                     KEY_CTRL('g'): self.show_info,
-                     'd': self.convert_datetime
+                     KEY_CTRL('g'): self.show_info
                      }
 
     def run(self):

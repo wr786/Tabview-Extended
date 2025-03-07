@@ -114,6 +114,10 @@ Keybindings:
 ---------------
 
 ==========================   =================================================
+**d**                        Convert datetime
+**@**                        Filter same cells
+**-**                        Hide column
+
 **F1 or ?**                  Show this list of keybindings
 **Cursor keys or h,j,k,l**   Move the highlighted cell, scrolling if required.
 **Q or q**                   Quit
@@ -136,13 +140,12 @@ Keybindings:
 **t**                        Toggle fixed header row
 **< >**                      Decrease/Increase column width (all columns)
 **, .**                      Decrease/Increase column width (current column)
-**- +**                      Decrease/Increase column gap
+**+**                        Increase column gap
 **s**                        Sort the table by the current column (ascending)
 **S**                        Sort the table by the current column (descending)
 **a**                        'Natural Sort' the table (ascending)
 **A**                        'Natural Sort' the table (descending)
 **#**                        Sort numerically by the current column (ascending)
-**@**                        Sort numerically by the current column (descending)
 **r**                        Reload file/data. Also resets sort order
 **y**                        Yank cell contents to the clipboard
                              (requires xsel or xclip)
