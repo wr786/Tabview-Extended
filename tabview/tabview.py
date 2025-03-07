@@ -665,6 +665,12 @@ class Viewer:
                 return  # not a num, can not convert
             tmpdata[y][xp] = convert_timestamp(tmpdata[y][xp])
         self.data = tmpdata
+
+    def filter_same_cells(self):
+        xp = self.x + self.win_x
+        yp = self.y + self.win_y
+        filtered_data = [row for row in self.data if row[xp] == self.data[yp][xp]]
+        self.data = filtered_data
         self.resize()
 
     def yank_cell(self):
@@ -716,7 +722,7 @@ class Viewer:
                      'a': self.sort_by_column_natural,
                      'A': self.sort_by_column_natural_reverse,
                      '#': self.sort_by_column_numeric,
-                     '@': self.sort_by_column_numeric_reverse,
+                     '@': self.filter_same_cells,
                      's': self.sort_by_column,
                      'S': self.sort_by_column_reverse,
                      'y': self.yank_cell,
