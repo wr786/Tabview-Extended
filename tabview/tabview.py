@@ -754,7 +754,7 @@ class Viewer:
     def define_keys(self):
         self.keys = {
                      'd': self.convert_datetime,
-                     '@': self.filter_same_cells,
+                     'e': self.filter_same_cells,
                      '-': self.hide_column,
                      '*': self.filter_columns_by_regex,
 
@@ -788,6 +788,7 @@ class Viewer:
                      'a': self.sort_by_column_natural,
                      'A': self.sort_by_column_natural_reverse,
                      '#': self.sort_by_column_numeric,
+                     '@': self.sort_by_column_numeric_reverse,
                      's': self.sort_by_column,
                      'S': self.sort_by_column_reverse,
                      'y': self.yank_cell,
