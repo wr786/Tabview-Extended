@@ -714,6 +714,49 @@ class Viewer:
         else:
             return ch
 
+    def filter_rows_by_regex(self):
+        scr2 = curses.newwin(3, self.max_x, self.max_y - 3, 0)
+        scr3 = scr2.derwin(1, self.max_x - 12, 1, 9)
+        scr2.box()
+        scr2.move(1, 1)
+        addstr(scr2, "Filter: ")
+        scr2.refresh()
+        curses.curs_set(1)
+        self._search_win_open = 3
+        self.textpad = Textbox(scr3, insert_mode=True)
+        filter_regex = self.textpad.edit(self._filter_columns_validator)
+        try:
+            curses.curs_set(0)
+        except _curses.error:
+            pass
+        self._search_win_open = 0
+
+        filter_regex = filter_regex.strip()
+        filter_regex = filter_regex.strip('\a')
+
+        xp = self.x + self.win_x
+
+        tmpdata = []
+        cury = self.y + self.win_y
+
+        for y, row in enumerate(self.data):
+            if re.search(filter_regex, row[xp]):
+                tmpdata.append(row)
+            elif y <= cury:
+                self.y -= 1
+
+        if len(tmpdata) <= 0:
+            self.y = cury - self.win_y
+            return
+
+        self.data = tmpdata
+
+        if self.y < 0:
+            self.y = 0
+
+        self.recalculate_layout()
+        self.resize()
+
     def filter_columns_by_regex(self):
         scr2 = curses.newwin(3, self.max_x, self.max_y - 3, 0)
         scr3 = scr2.derwin(1, self.max_x - 12, 1, 9)
@@ -756,6 +799,7 @@ class Viewer:
                      'd': self.convert_datetime,
                      'e': self.filter_same_cells,
                      '-': self.hide_column,
+                     '&': self.filter_rows_by_regex,
                      '*': self.filter_columns_by_regex,
 
                      'j': self.down,
