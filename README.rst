@@ -119,6 +119,7 @@ Keybindings:
 **-**                        Hide column
 **&**                        Filter rows by regex
 *****                        Filter columns by regex
+**u**                        Unique (drop duplicate)
 
 **F1 or ?**                  Show this list of keybindings
 **Cursor keys or h,j,k,l**   Move the highlighted cell, scrolling if required.

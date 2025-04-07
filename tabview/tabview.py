@@ -794,6 +794,32 @@ class Viewer:
         self.recalculate_layout()
         self.resize()
 
+    def drop_duplicates(self):
+        xp = self.x + self.win_x
+
+        visited = set({})
+        tmpdata = []
+        cury = self.y + self.win_y
+
+        for y, row in enumerate(self.data):
+            if row[xp] not in visited:
+                tmpdata.append(row)
+                visited.add(row[xp])
+            elif y <= cury:
+                self.y -= 1
+
+        if len(tmpdata) <= 0:
+            self.y = cury - self.win_y
+            return
+
+        self.data = tmpdata
+
+        if self.y < 0:
+            self.y = 0
+
+        self.recalculate_layout()
+        self.resize()
+
     def define_keys(self):
         self.keys = {
                      'd': self.convert_datetime,
@@ -801,6 +827,7 @@ class Viewer:
                      '-': self.hide_column,
                      '&': self.filter_rows_by_regex,
                      '*': self.filter_columns_by_regex,
+                     'u': self.drop_duplicates,
 
                      'j': self.down,
                      'k': self.up,
