@@ -753,6 +753,8 @@ class Viewer:
 
         if self.y < 0:
             self.y = 0
+        
+        self.win_y = 0
 
         self.recalculate_layout()
         self.resize()
@@ -791,6 +793,7 @@ class Viewer:
         self.x -= len(matching_indices)
         if self.x < 0:
             self.x = 0
+        self.win_x = 0
         self.recalculate_layout()
         self.resize()
 

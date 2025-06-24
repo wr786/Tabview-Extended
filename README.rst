@@ -115,7 +115,7 @@ Keybindings:
 
 ==========================   =================================================
 **d**                        Convert datetime
-**@**                        Filter same cells
+**e**                        Filter same cells
 **-**                        Hide column
 **&**                        Filter rows by regex
 *****                        Filter columns by regex

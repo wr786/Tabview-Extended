@@ -8,7 +8,7 @@ except ImportError:
     pass
 
 setup(name="tabview",
-      version="2.0.0",
+      version="2.0.1",
       description="A curses command-line CSV and list (tabular data) viewer refined by wr786",
       long_description=open('README.rst', 'rb').read().decode('utf-8'),
       author="Scott Hansen",
